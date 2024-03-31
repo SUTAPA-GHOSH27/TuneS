@@ -1,0 +1,54 @@
+{% extends 'tunes/basic.html' %}
+{% block title %}Recorder{% endblock %}
+
+{% block body %}
+{% load static %}
+    <h1>Sound Recorder</h1>
+    <div>
+        <button id="startButton">Start Recording</button>
+        <button id="stopButton" disabled>Stop Recording</button>
+    </div>
+    <div>
+        <audio id="audioPlayback" controls></audio>
+    </div>
+
+    <script>
+        let audioStream;
+        let mediaRecorder;
+        let chunks = [];
+
+        const startRecording = async () => {
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(audioStream);
+
+                mediaRecorder.ondataavailable = function (e) {
+                    chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = function () {
+                    const blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' });
+                    const audioURL = window.URL.createObjectURL(blob);
+                    document.getElementById('audioPlayback').src = audioURL;
+                };
+
+                mediaRecorder.start();
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('stopButton').disabled = false;
+            } catch (err) {
+                console.error('Error accessing audio stream:', err);
+            }
+        };
+
+        const stopRecording = () => {
+            mediaRecorder.stop();
+            audioStream.getTracks().forEach(track => track.stop());
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+        };
+
+        document.getElementById('startButton').addEventListener('click', startRecording);
+        document.getElementById('stopButton').addEventListener('click', stopRecording);
+    </script>
+
+{% endblock %}

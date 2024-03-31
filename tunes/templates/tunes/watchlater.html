@@ -1,0 +1,35 @@
+
+{% extends 'tunes/basic.html' %}
+{% block title %}Watch Later{% endblock %}
+
+{% block body %}
+{% load static %}
+<div class="container">
+    <h1>Welcome to the Watch Later Page</h1>
+    <form action="{% url 'add_to_watchlater' %}" method="POST">
+        {% csrf_token %}
+        <label for="song_id">Add Song to Watch Later:</label>
+        <input type="text" id="song_id" name="song_id">
+        <button type="submit">Add</button>
+    </form>
+
+    <h2>Watch Later List:</h2>
+    <ul>
+        {% for song in watchlater_list %}
+        <li>{{ song }}</li>
+        {% endfor %}
+    </ul>
+
+    <form action="{% url 'remove_from_watchlater' %}" method="POST">
+        {% csrf_token %}
+        <label for="song_id">Remove Song from Watch Later:</label>
+        <select id="song_id" name="song_id">
+            {% for song in watchlater_list %}
+            <option value="{{ song.id }}">{{ song }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Remove</button>
+    </form>
+</div>
+{% endblock %}
+
